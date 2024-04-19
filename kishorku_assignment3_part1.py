@@ -255,14 +255,13 @@ class A3CWorker(mp.Process):
         return update_loss
 
     def asynchronous_update(self):
+        self.global_optimizer.zero_grad()
 
         for global_param, local_param in zip(self.global_model.parameters(), self.local_model.parameters()):
-            if global_param.grad is None:
-                global_param.grad = local_param.grad.clone().detach()
-            else:
-                global_param.grad += global_param.grad + local_param.grad.clone().detach()
+            global_param.grad += local_param.grad.clone().detach()
         
         self.global_optimizer.step()
+
     
     def synchronize_models(self):
         self.local_optimizer.zero_grad()
